@@ -8,7 +8,7 @@ app = Chalice(app_name='chalice-transmogrify')
 
 
 @app.route('/convert')
-def convert():
+def index():
     """
     /convert endpoint accepts a URL and converts it to json
     :param url: url to resource containing xml/rss document
