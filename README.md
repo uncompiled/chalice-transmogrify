@@ -1,5 +1,10 @@
 # chalice-transmogrify
 
+[![Build Status](https://travis-ci.org/uncompiled/chalice-transmogrify.svg?branch=master)](https://travis-ci.org/uncompiled/chalice-transmogrify)
+[![Code Climate](https://codeclimate.com/github/uncompiled/chalice-transmogrify/badges/gpa.svg)](https://codeclimate.com/github/uncompiled/chalice-transmogrify)
+[![Test Coverage](https://codeclimate.com/github/uncompiled/chalice-transmogrify/badges/coverage.svg)](https://codeclimate.com/github/uncompiled/chalice-transmogrify/coverage)
+[![Issue Count](https://codeclimate.com/github/uncompiled/chalice-transmogrify/badges/issue_count.svg)](https://codeclimate.com/github/uncompiled/chalice-transmogrify)
+
 chalice-transmogrify a service that transforms XML/RSS to JSON and is 
 designed to run on AWS Lambda.
 
