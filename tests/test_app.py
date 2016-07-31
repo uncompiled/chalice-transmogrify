@@ -6,8 +6,8 @@ from xml.parsers.expat import ExpatError
 
 
 @pytest.mark.parametrize("xml_file,json_file", [
-    ('test/fixtures/test.rss', 'test/fixtures/test.json'),
-    ('test/fixtures/books.xml', 'test/fixtures/books.json'),
+    ('tests/fixtures/test.rss', 'tests/fixtures/test.json'),
+    ('tests/fixtures/books.xml', 'tests/fixtures/books.json'),
 ])
 def test_transform(xml_file, json_file):
     # Tests whether the input is correctly transformed
@@ -20,9 +20,9 @@ def test_transform(xml_file, json_file):
 
 
 @pytest.mark.parametrize("input_file", [
-    'test/fixtures/missing_opening_tag.xml',
-    'test/fixtures/missing_closing_tag.xml',
-    'test/fixtures/google.html',
+    'tests/fixtures/missing_opening_tag.xml',
+    'tests/fixtures/missing_closing_tag.xml',
+    'tests/fixtures/google.html',
 ])
 def test_invalid(input_file):
     # Tests whether invalid XML files throw ExpatError
