@@ -36,6 +36,48 @@ Otherwise, you'll need to [configure your AWS credentials](http://boto3.readthed
 
 - `chalice deploy`
 
+# Endpoints
+
+```
+GET /convert
+```
+
+PARAMS:
+
+- **url** = urlencoded path to an RSS feed
+
+
+### Example Request
+`/convert?url=http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml`
+
+### Example Response
+```
+{
+    "rss": {
+        "@xmlns:dc": "http://purl.org/dc/elements/1.1/",
+        "@xmlns:media": "http://search.yahoo.com/mrss/",
+        "@xmlns:atom": "http://www.w3.org/2005/Atom",
+        "@xmlns:nyt": "http://www.nytimes.com/namespaces/rss/2.0",
+        "@version": "2.0",
+        "channel": {
+            "title": "NYT > Home Page",
+            "link": "http://www.nytimes.com/pages/index.html?partner=rss&emc=rss",
+            "atom:link": {},
+            "description": null,
+            "language": "en-us",
+            "copyright": "Copyright 2016  The New York Times Company",
+            "lastBuildDate": "Tue, 31 May 2016 00:42:36 GMT",
+            "image": {
+                "title": "NYT > Home Page",
+                "url": "https://static01.nyt.com/images/misc/NYT_logo_rss_250x40.png",
+                "link": "http://www.nytimes.com/pages/index.html?partner=rss&emc=rss"
+            },
+            "item": [] // feed items
+        }
+    }
+}
+```
+
 # License
 
 The MIT License (MIT)
