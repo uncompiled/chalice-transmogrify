@@ -17,7 +17,8 @@ for production APIs.**
 
 ## Set up your environment
 
-- Clone this repo.
+- `git clone https://github.com/uncompiled/chalice-transmogrify.git`
+- `cd chalice-transmogrify`
 - `mkvirtualenv chalice-transmogrify` (recommended)
 - `pip install -r requirements.txt`
 
