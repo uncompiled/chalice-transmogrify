@@ -1,10 +1,11 @@
 import requests
 import xmltodict
 
-from chalice import Chalice
+from chalice import Chalice, BadRequestError
 from xml.parsers.expat import ExpatError
 
 app = Chalice(app_name='chalice-transmogrify')
+app.debug = True
 
 
 @app.route('/convert')
@@ -16,20 +17,14 @@ def index():
     """
     request = app.current_request
     if 'url' not in request.query_params:
-        return {
-            'status': 400,
-            'message': "Missing url parameter"
-        }
+        raise BadRequestError("Missing url parameter")
     else:
         url = request.query_params['url']
 
         try:
             response = transform(get_rss(url))
         except ExpatError:
-            return {
-                'status': 400,
-                'message': "Input is not XML"
-            }
+            raise BadRequestError("Input is not XML")
         else:
             return response
 
