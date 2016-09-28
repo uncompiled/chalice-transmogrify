@@ -14,16 +14,16 @@ Serverless Microframework for Python.
 **Disclaimer: chalice is a developer preview project and not recommended
 for production APIs.**
 
-# Getting Started
+## Getting Started
 
-## Set up your environment
+### Set up your environment
 
 - `git clone https://github.com/uncompiled/chalice-transmogrify.git`
 - `cd chalice-transmogrify`
 - `mkvirtualenv chalice-transmogrify` (recommended)
 - `pip install -r requirements.txt`
 
-## Configure AWS Credentials
+### Configure AWS Credentials
  
 chalice is specifically designed to work on [AWS Lambda](https://aws.amazon.com/lambda/),
 so you will need an AWS account to use it.
@@ -33,11 +33,11 @@ If you have previously configured your machine to use boto3
 
 Otherwise, you'll need to [configure your AWS credentials](http://boto3.readthedocs.io/en/latest/guide/configuration.html).
 
-## Deploy to AWS Lambda
+### Deploy to AWS Lambda
 
 - `chalice deploy`
 
-# Endpoints
+## Endpoints
 
 ```
 GET /convert
@@ -79,6 +79,6 @@ PARAMS:
 }
 ```
 
-# License
+## License
 
 The MIT License (MIT)
