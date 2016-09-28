@@ -1,4 +1,4 @@
-botocore==1.4.56
+botocore==1.4.57
 chalice==0.1.0
 click==6.6
 docutils==0.12
