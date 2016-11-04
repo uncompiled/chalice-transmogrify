@@ -1,5 +1,5 @@
-botocore==1.4.67
-chalice==0.3.0
+botocore==1.4.70
+chalice==0.4.0
 click==6.6
 docutils==0.12
 jmespath==0.9.0
