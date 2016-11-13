@@ -1,9 +1,9 @@
-botocore==1.4.70
+botocore==1.4.71
 chalice==0.4.0
 click==6.6
 docutils==0.12
 jmespath==0.9.0
-python-dateutil==2.5.3
+python-dateutil==2.6.0
 requests==2.11.1
 six==1.10.0
 typing==3.5.2.2
