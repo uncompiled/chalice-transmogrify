@@ -1,11 +1,11 @@
-botocore==1.4.87
-chalice==0.5.0
-click==6.6
+botocore==1.5.18
+chalice==0.6.0
+click==6.7
 docutils==0.13.1
-jmespath==0.9.0
+jmespath==0.9.1
 python-dateutil==2.6.0
-requests==2.12.4
+requests==2.13.0
 six==1.10.0
-typing==3.5.2.2
+typing==3.5.3.0
 wheel==0.29.0
 xmltodict==0.10.2
