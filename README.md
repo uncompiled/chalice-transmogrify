@@ -11,9 +11,6 @@ designed to run on AWS Lambda.
 It's built on the [chalice](https://github.com/awslabs/chalice)
 Serverless Microframework for Python.
 
-**Disclaimer: chalice is a developer preview project and not recommended
-for production APIs.**
-
 ## Getting Started
 
 ### Set up your environment
