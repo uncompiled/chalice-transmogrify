@@ -16,8 +16,7 @@ Serverless Microframework for Python.
 
 - `git clone https://github.com/uncompiled/chalice-transmogrify.git`
 - `cd chalice-transmogrify`
-- `mkvirtualenv chalice-transmogrify` (recommended)
-- `pip install -r requirements.txt`
+- `pipenv install` (recommended)
 
 ### Configure AWS Credentials
  
@@ -31,7 +30,7 @@ Otherwise, you'll need to [configure your AWS credentials](http://boto3.readthed
 
 ### Deploy to AWS Lambda
 
-- `chalice deploy`
+- `pipenv run chalice deploy`
 
 ## Endpoints
 
