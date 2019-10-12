@@ -22,7 +22,6 @@ def test_transform(xml_file, json_file):
 @pytest.mark.parametrize("input_file", [
     'tests/fixtures/missing_opening_tag.xml',
     'tests/fixtures/missing_closing_tag.xml',
-    'tests/fixtures/google.html',
 ])
 def test_invalid(input_file):
     # Tests whether invalid XML files throw ExpatError
