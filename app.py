@@ -1,40 +1,95 @@
+import hashlib
 import requests
 import xmltodict
 
-from chalice import Chalice, BadRequestError
+from chalice import Chalice, BadRequestError, Response
+from urllib.parse import urlparse
 from xml.parsers.expat import ExpatError
 
 app = Chalice(app_name='chalice-transmogrify')
 app.debug = True
 
 
+def _sha256_tag(value):
+    return hashlib.sha256(value.encode()).hexdigest()[:12]
+
+
+def extract_item_ids(parsed_feed):
+    ids = []
+    # RSS 2.0
+    try:
+        items = parsed_feed['rss']['channel']['item']
+        if isinstance(items, dict):
+            items = [items]
+        for item in items:
+            guid = item.get('guid') or item.get('link')
+            if isinstance(guid, dict):
+                guid = guid.get('#text') or guid.get('@href')
+            if guid:
+                ids.append(str(guid))
+    except (KeyError, TypeError):
+        pass
+    # Atom
+    try:
+        entries = parsed_feed['feed']['entry']
+        if isinstance(entries, dict):
+            entries = [entries]
+        for entry in entries:
+            eid = entry.get('id') or entry.get('link')
+            if isinstance(eid, dict):
+                eid = eid.get('#text') or eid.get('@href')
+            if eid:
+                ids.append(str(eid))
+    except (KeyError, TypeError):
+        pass
+    return ids
+
+
+def generate_cache_tags(url, parsed_feed=None, include_items=False):
+    tags = [f'feed:{_sha256_tag(url)}']
+    netloc = urlparse(url).netloc
+    if netloc:
+        tags.append(f'domain:{netloc}')
+    if include_items and parsed_feed is not None:
+        for item_id in extract_item_ids(parsed_feed):
+            tags.append(f'item:{_sha256_tag(item_id)}')
+    return ' '.join(tags)
+
+
 @app.route('/convert')
 def index():
-    """
-    /convert endpoint accepts a URL and converts it to json
-    :param url: url to resource containing xml/rss document
-    :return: json representation of the xml/rss document
-    """
     request = app.current_request
-    if 'url' not in request.query_params:
-        raise BadRequestError("Missing url parameter")
-    else:
-        url = request.query_params['url']
+    params = request.query_params or {}
 
-        try:
-            response = transform(get_rss(url))
-        except ExpatError:
-            raise BadRequestError("Input is not XML")
-        else:
-            return response
+    if 'url' not in params:
+        raise BadRequestError("Missing url parameter")
+
+    url = params['url']
+    include_items = params.get('tags') == 'items'
+    base_tags = generate_cache_tags(url)
+
+    rss = get_rss(url)
+    if rss is None:
+        return Response(
+            body={'Code': 'BadRequestError', 'Message': 'Unable to fetch URL'},
+            status_code=400,
+            headers={'Surrogate-Key': base_tags},
+        )
+
+    try:
+        parsed = transform(rss)
+    except ExpatError:
+        return Response(
+            body={'Code': 'BadRequestError', 'Message': 'Input is not XML'},
+            status_code=400,
+            headers={'Surrogate-Key': base_tags},
+        )
+
+    tags = generate_cache_tags(url, parsed, include_items)
+    return Response(body=parsed, headers={'Surrogate-Key': tags})
 
 
 def get_rss(url):
-    """
-    get rss feed from a given url
-    :param url: url to resource containing rss feed
-    :return: text of the response, otherwise None
-    """
     try:
         response = requests.get(url, timeout=1.0).text
     except (requests.RequestException, ValueError):
@@ -43,9 +98,4 @@ def get_rss(url):
 
 
 def transform(rss):
-    """
-    transform rss to json
-    :param rss: xml document containing rss feed
-    :return: json formatted output
-    """
     return xmltodict.parse(rss)
