@@ -1,4 +1,5 @@
 import hashlib
+import re
 import requests
 import xmltodict
 
@@ -8,6 +9,14 @@ from xml.parsers.expat import ExpatError
 
 app = Chalice(app_name='chalice-transmogrify')
 app.debug = True
+
+# Characters outside [a-zA-Z0-9_-] are rejected by Akamai (and the most
+# restrictive of Fastly / CloudFlare / CloudFront as a group).
+_UNSAFE_TAG_CHARS = re.compile(r'[^a-zA-Z0-9_-]+')
+
+
+def _sanitize(value):
+    return _UNSAFE_TAG_CHARS.sub('-', value).strip('-')
 
 
 def _sha256_tag(value):
@@ -46,13 +55,13 @@ def extract_item_ids(parsed_feed):
 
 
 def generate_cache_tags(url, parsed_feed=None, include_items=False):
-    tags = [f'feed:{_sha256_tag(url)}']
+    tags = [f'feed-{_sha256_tag(url)}']
     netloc = urlparse(url).netloc
     if netloc:
-        tags.append(f'domain:{netloc}')
+        tags.append(f'domain-{_sanitize(netloc)}')
     if include_items and parsed_feed is not None:
         for item_id in extract_item_ids(parsed_feed):
-            tags.append(f'item:{_sha256_tag(item_id)}')
+            tags.append(f'item-{_sha256_tag(item_id)}')
     return ' '.join(tags)
 
 

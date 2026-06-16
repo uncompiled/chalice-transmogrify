@@ -37,31 +37,31 @@ def test_invalid(input_file):
 
 def test_generate_cache_tags_feed_prefix():
     tags = generate_cache_tags('https://example.com/feed.rss')
-    assert any(t.startswith('feed:') for t in tags.split())
+    assert any(t.startswith('feed-') for t in tags.split())
 
 
 def test_generate_cache_tags_feed_hash_is_stable():
     url = 'https://example.com/feed.rss'
     expected = hashlib.sha256(url.encode()).hexdigest()[:12]
     tags = generate_cache_tags(url)
-    assert f'feed:{expected}' in tags.split()
+    assert f'feed-{expected}' in tags.split()
 
 
 def test_generate_cache_tags_domain():
     tags = generate_cache_tags('https://feeds.example.com/rss')
-    assert 'domain:feeds.example.com' in tags.split()
+    assert 'domain-feeds-example-com' in tags.split()
 
 
 def test_generate_cache_tags_no_items_by_default():
     parsed = {'rss': {'channel': {'item': [{'guid': 'abc', 'link': 'http://x.com/1'}]}}}
     tags = generate_cache_tags('https://example.com/feed', parsed)
-    assert not any(t.startswith('item:') for t in tags.split())
+    assert not any(t.startswith('item-') for t in tags.split())
 
 
 def test_generate_cache_tags_items_when_requested():
     parsed = {'rss': {'channel': {'item': [{'guid': 'abc'}, {'guid': 'def'}]}}}
     tags = generate_cache_tags('https://example.com/feed', parsed, include_items=True)
-    item_tags = [t for t in tags.split() if t.startswith('item:')]
+    item_tags = [t for t in tags.split() if t.startswith('item-')]
     assert len(item_tags) == 2
 
 
@@ -70,14 +70,14 @@ def test_generate_cache_tags_item_hash_is_stable():
     expected = hashlib.sha256(guid.encode()).hexdigest()[:12]
     parsed = {'rss': {'channel': {'item': {'guid': guid}}}}
     tags = generate_cache_tags('https://example.com/feed', parsed, include_items=True)
-    assert f'item:{expected}' in tags.split()
+    assert f'item-{expected}' in tags.split()
 
 
 def test_generate_cache_tags_without_parsed_feed():
     # Should produce feed + domain only, no crash
     tags = generate_cache_tags('https://example.com/feed', include_items=True)
-    assert not any(t.startswith('item:') for t in tags.split())
-    assert 'domain:example.com' in tags.split()
+    assert not any(t.startswith('item-') for t in tags.split())
+    assert 'domain-example-com' in tags.split()
 
 
 # --- extract_item_ids ---
@@ -138,8 +138,8 @@ def test_route_success_has_surrogate_key_header():
     assert result.status_code == 200
     assert 'Surrogate-Key' in result.headers
     tags = result.headers['Surrogate-Key'].split()
-    assert any(t.startswith('feed:') for t in tags)
-    assert 'domain:example.com' in tags
+    assert any(t.startswith('feed-') for t in tags)
+    assert 'domain-example-com' in tags
 
 
 def test_route_success_no_item_tags_by_default():
@@ -147,7 +147,7 @@ def test_route_success_no_item_tags_by_default():
         with patch('app.get_rss', return_value='<rss><channel><item><guid>g1</guid></item></channel></rss>'):
             result = client.http.get('/convert?url=https://example.com/feed.rss')
     tags = result.headers['Surrogate-Key'].split()
-    assert not any(t.startswith('item:') for t in tags)
+    assert not any(t.startswith('item-') for t in tags)
 
 
 def test_route_success_item_tags_when_requested():
@@ -155,7 +155,7 @@ def test_route_success_item_tags_when_requested():
         with patch('app.get_rss', return_value='<rss><channel><item><guid>g1</guid></item></channel></rss>'):
             result = client.http.get('/convert?url=https://example.com/feed.rss&tags=items')
     tags = result.headers['Surrogate-Key'].split()
-    assert any(t.startswith('item:') for t in tags)
+    assert any(t.startswith('item-') for t in tags)
 
 
 def test_route_get_rss_failure_returns_400_with_surrogate_key():
@@ -165,8 +165,8 @@ def test_route_get_rss_failure_returns_400_with_surrogate_key():
     assert result.status_code == 400
     assert 'Surrogate-Key' in result.headers
     tags = result.headers['Surrogate-Key'].split()
-    assert any(t.startswith('feed:') for t in tags)
-    assert 'domain:example.com' in tags
+    assert any(t.startswith('feed-') for t in tags)
+    assert 'domain-example-com' in tags
 
 
 def test_route_invalid_xml_returns_400_with_surrogate_key():
