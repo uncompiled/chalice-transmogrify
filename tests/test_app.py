@@ -131,9 +131,12 @@ def test_extract_item_ids_with_real_rss_fixture():
 
 # --- /convert route ---
 
+_SIMPLE_RSS = '<rss><channel><item><guid>g1</guid></item></channel></rss>'
+
+
 def test_route_success_has_surrogate_key_header():
     with Client(app) as client:
-        with patch('app.get_rss', return_value='<rss><channel><item><guid>g1</guid></item></channel></rss>'):
+        with patch('app.get_rss', return_value=(_SIMPLE_RSS, None)):
             result = client.http.get('/convert?url=https://example.com/feed.rss')
     assert result.status_code == 200
     assert 'Surrogate-Key' in result.headers
@@ -144,7 +147,7 @@ def test_route_success_has_surrogate_key_header():
 
 def test_route_success_no_item_tags_by_default():
     with Client(app) as client:
-        with patch('app.get_rss', return_value='<rss><channel><item><guid>g1</guid></item></channel></rss>'):
+        with patch('app.get_rss', return_value=(_SIMPLE_RSS, None)):
             result = client.http.get('/convert?url=https://example.com/feed.rss')
     tags = result.headers['Surrogate-Key'].split()
     assert not any(t.startswith('item-') for t in tags)
@@ -152,15 +155,29 @@ def test_route_success_no_item_tags_by_default():
 
 def test_route_success_item_tags_when_requested():
     with Client(app) as client:
-        with patch('app.get_rss', return_value='<rss><channel><item><guid>g1</guid></item></channel></rss>'):
+        with patch('app.get_rss', return_value=(_SIMPLE_RSS, None)):
             result = client.http.get('/convert?url=https://example.com/feed.rss&tags=items')
     tags = result.headers['Surrogate-Key'].split()
     assert any(t.startswith('item-') for t in tags)
 
 
+def test_route_success_default_cache_control():
+    with Client(app) as client:
+        with patch('app.get_rss', return_value=(_SIMPLE_RSS, None)):
+            result = client.http.get('/convert?url=https://example.com/feed.rss')
+    assert result.headers.get('Cache-Control') == 'max-age=300'
+
+
+def test_route_success_passthrough_cache_control():
+    with Client(app) as client:
+        with patch('app.get_rss', return_value=(_SIMPLE_RSS, 'max-age=600, public')):
+            result = client.http.get('/convert?url=https://example.com/feed.rss')
+    assert result.headers.get('Cache-Control') == 'max-age=600, public'
+
+
 def test_route_get_rss_failure_returns_400_with_surrogate_key():
     with Client(app) as client:
-        with patch('app.get_rss', return_value=None):
+        with patch('app.get_rss', return_value=(None, None)):
             result = client.http.get('/convert?url=https://example.com/feed.rss')
     assert result.status_code == 400
     assert 'Surrogate-Key' in result.headers
@@ -169,9 +186,16 @@ def test_route_get_rss_failure_returns_400_with_surrogate_key():
     assert 'domain-example-com' in tags
 
 
+def test_route_get_rss_failure_default_cache_control():
+    with Client(app) as client:
+        with patch('app.get_rss', return_value=(None, None)):
+            result = client.http.get('/convert?url=https://example.com/feed.rss')
+    assert result.headers.get('Cache-Control') == 'max-age=300'
+
+
 def test_route_invalid_xml_returns_400_with_surrogate_key():
     with Client(app) as client:
-        with patch('app.get_rss', return_value='not xml at all <<<'):
+        with patch('app.get_rss', return_value=('not xml at all <<<', None)):
             result = client.http.get('/convert?url=https://example.com/feed.rss')
     assert result.status_code == 400
     assert 'Surrogate-Key' in result.headers

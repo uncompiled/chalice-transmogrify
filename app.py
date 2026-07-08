@@ -77,12 +77,15 @@ def index():
     include_items = params.get('tags') == 'items'
     base_tags = generate_cache_tags(url)
 
-    rss = get_rss(url)
+    rss, cache_control = get_rss(url)
+    if cache_control is None:
+        cache_control = 'max-age=300'
+
     if rss is None:
         return Response(
             body={'Code': 'BadRequestError', 'Message': 'Unable to fetch URL'},
             status_code=400,
-            headers={'Surrogate-Key': base_tags},
+            headers={'Surrogate-Key': base_tags, 'Cache-Control': cache_control},
         )
 
     try:
@@ -91,19 +94,19 @@ def index():
         return Response(
             body={'Code': 'BadRequestError', 'Message': 'Input is not XML'},
             status_code=400,
-            headers={'Surrogate-Key': base_tags},
+            headers={'Surrogate-Key': base_tags, 'Cache-Control': cache_control},
         )
 
     tags = generate_cache_tags(url, parsed, include_items)
-    return Response(body=parsed, headers={'Surrogate-Key': tags})
+    return Response(body=parsed, headers={'Surrogate-Key': tags, 'Cache-Control': cache_control})
 
 
 def get_rss(url):
     try:
-        response = requests.get(url, timeout=1.0).text
+        resp = requests.get(url, timeout=1.0)
+        return resp.text, resp.headers.get('Cache-Control')
     except (requests.RequestException, ValueError):
-        response = None
-    return response
+        return None, None
 
 
 def transform(rss):
